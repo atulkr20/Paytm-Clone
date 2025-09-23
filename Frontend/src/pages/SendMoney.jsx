@@ -1,61 +1,82 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useState } from 'react';
+import { useState } from "react";
 
 export const SendMoney = () => {
-    const [searchParams] = useSearchParams();
-    const id = searchParams.get("id");
-    const name = searchParams.get("name");
-    const [amount, setAmount] = useState(0);
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const name = searchParams.get("name");
+  const [amount, setAmount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-    return <div class="flex justify-center h-screen bg-gray-100">
-        <div className="h-full flex flex-col justify-center">
-            <div
-                class="border h-min text-card-foreground max-w-md p-4 space-y-8 w-96 bg-white shadow-lg rounded-lg"
-            >
-                <div class="flex flex-col space-y-1.5 p-6">
-                <h2 class="text-3xl font-bold text-center">Send Money</h2>
-                </div>
-                <div class="p-6">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
-                    <span class="text-2xl text-white">{name[0].toUpperCase()}</span>
-                    </div>
-                    <h3 class="text-2xl font-semibold">{name}</h3>
-                </div>
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                    <label
-                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        for="amount"
-                    >
-                        Amount (in Rs)
-                    </label>
-                    <input
-                        onChange={(e) => {
-                            setAmount(e.target.value);
-                        }}
-                        type="number"
-                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        id="amount"
-                        placeholder="Enter amount"
-                    />
-                    </div>
-                    <button onClick={() => {
-                        axios.post("http://localhost:3000/api/v1/account/transfer", {
-                            to: id,
-                            amount
-                        }, {
-                            headers: {
-                                Authorization: "Bearer " + localStorage.getItem("token")
-                            }
-                        })
-                    }} class="justify-center rounded-md text-sm font-medium ring-offset-background transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white">
-                        Initiate Transfer
-                    </button>
-                </div>
-                </div>
-        </div>
+  const handleTransfer = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "/api/v1/account/transfer",
+        { to: id, amount: Number(amount) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+      <div className="w-full max-w-md bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
+        {!success ? (
+          <>
+            <h2 className="text-xl font-semibold tracking-tight">Send money</h2>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                <span className="text-sm font-medium">{name ? name[0].toUpperCase() : '?'}</span>
+              </div>
+              <div className="text-sm text-zinc-700">{name}</div>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <label htmlFor="amount" className="text-sm text-zinc-700">Amount (in ₹)</label>
+              <input
+                id="amount"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full h-10 px-3 py-2 rounded-md border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+              />
+              <div className="pt-2">
+                <button
+                  onClick={handleTransfer}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {loading ? "Processing..." : "Send"}
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <div className="mx-auto h-12 w-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              ✓
+            </div>
+            <h3 className="mt-4 text-lg font-semibold">Transfer successful</h3>
+            <p className="mt-1 text-sm text-zinc-600">Your money is on its way to {name}.</p>
+            <div className="mt-6 flex gap-2">
+              <button onClick={() => navigate('/dashboard')} className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-black text-white hover:bg-zinc-900">Back to dashboard</button>
+              <button onClick={() => { setSuccess(false); setAmount(0); }} className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-zinc-200 hover:bg-zinc-50">Send again</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-}
+  );
+};

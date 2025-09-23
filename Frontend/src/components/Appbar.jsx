@@ -1,18 +1,13 @@
 export const Appbar = () => {
-    return <div className="shadow h-14 flex justify-between">
-
-    <div className="flex flex-col justify-center h-full ml-4">
-        PayTM App
-    </div>
-    <div className="flex">
-        <div className="flex flex-col justify-center h-full mr-4">
-            Hello
-        </div>
-        <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
-            <div className="flex flex-col justify-center h-full text-xl">
-                U
+    return (
+        <header className="h-14 border-b border-zinc-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50">
+            <div className="mx-auto max-w-5xl h-full px-4 flex items-center justify-between">
+                <div className="font-semibold tracking-tight">Paytm</div>
+                <div className="flex items-center gap-3">
+                    <span className="text-sm text-zinc-600">Hello</span>
+                    <div className="rounded-full h-9 w-9 bg-zinc-200 flex items-center justify-center text-sm font-medium">U</div>
                 </div>
             </div>
-        </div>
-    </div>
+        </header>
+    );
 }

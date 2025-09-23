@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { authMiddleware } = require("../auth/middleware");
 const { Account } = require("../db");
-const { success } = require("zod");
 
 const router = express.Router();
 
@@ -33,9 +32,12 @@ router.post("/transfer", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    const account = await Account.findOne({ userId: req.userId }).session(
-      session
-    );
+    if (to.toString() === req.userId.toString()) {
+      await session.abortTransaction();
+      return res.status(400).json({ message: "You cannot send money to yourself" });
+    }
+
+    const account = await Account.findOne({ userId: req.userId }).session(session);
     if (!account || account.balance < amount) {
       await session.abortTransaction();
       return res.status(400).json({ message: "Insufficient balance" });
@@ -47,14 +49,8 @@ router.post("/transfer", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Invalid recipient account" });
     }
 
-    await Account.updateOne(
-      { userId: req.userId },
-      { $inc: { balance: -amount } }
-    ).session(session);
-    await Account.updateOne(
-      { userId: to },
-      { $inc: { balance: amount } }
-    ).session(session);
+    await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
+    await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
 
     await session.commitTransaction();
     res.json({ message: "Transfer successful" });
