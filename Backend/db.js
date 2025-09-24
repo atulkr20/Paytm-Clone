@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const mongoUri = process.env.MONGODB_URI || "";
+const mongoUri = process.env.MONGO_URI || "";
 
 main().catch(err => console.log("Error Connecting to MongoDB"));
 
