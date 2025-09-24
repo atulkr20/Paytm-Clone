@@ -49,17 +49,17 @@ export const Signup = () => {
         <Heading label="Sign up" />
         <SubHeading label="Enter your information to create an account" />
         <InputBox
-          placeholder="John"
+          placeholder="Atul"
           label="First Name"
           onChange={(e) => setFirstName(e.target.value)}
         />
         <InputBox
-          placeholder="Doe"
+          placeholder="Jha"
           label="Last Name"
           onChange={(e) => setLastName(e.target.value)}
         />
         <InputBox
-          placeholder="harkirat@gmail.com"
+          placeholder="atul@gmail.com"
           label="Email"
           onChange={(e) => setEmail(e.target.value)}   
         />

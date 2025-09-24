@@ -7,35 +7,65 @@ import axios from "axios";
 export const Dashboard = () => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post("/api/v1/user/logout", {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/v1/account/balance", {
+
+        const balanceRes = await axios.get("/api/v1/account/balance", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setBalance(res.data.balance);
+        setBalance(balanceRes.data.balance);
+
+        const userRes = await axios.get("/api/v1/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(userRes.data);
       } catch (err) {
         console.error(err);
-        alert("Failed to fetch balance");
+        window.location.href = "/login"; // redirect if token invalid
       } finally {
         setLoading(false);
       }
     };
-    fetchBalance();
+    fetchData();
   }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <Appbar />
+      <Appbar>
+        {user && <span className="mr-4 text-lg">Hello, {user.firstName}</span>}
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-black hover:bg-zinc-800 text-white rounded"
+        >
+          Logout
+        </button>
+      </Appbar>
       <main className="mx-auto max-w-5xl px-4 py-6 space-y-6">
         {loading ? (
-          <div className="text-sm text-zinc-600">Loading balance...</div>
+          <div className="text-sm text-zinc-600">Loading...</div>
         ) : (
-          balance !== null && <Balance value={balance.toLocaleString()} />
+          <>
+            {balance !== null && <Balance value={balance.toLocaleString()} />}
+            <Users />
+          </>
         )}
-        <Users />
       </main>
     </div>
   );

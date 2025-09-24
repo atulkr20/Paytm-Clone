@@ -19,16 +19,12 @@ router.post("/signup", async (req, res) => {
     const parsed = signupBody.safeParse(req.body);
 
     if (!parsed.success) {
-        return res.status(411).json({
-            message: "incorrect inputs"
-        });
+        return res.status(411).json({ message: "incorrect inputs" });
     }
 
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-        return res.status(411).json({
-            message: "User already exists"
-        });
+        return res.status(411).json({ message: "User already exists" });
     }
 
     const createdUser = await User.create(userDetails);
@@ -41,10 +37,7 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign({ userId }, JWT_SECRET);
 
-    res.json({
-        message: "User created Successfully",
-        token
-    });
+    res.json({ message: "User created Successfully", token });
 });
 
 const signinBody = z.object({
@@ -55,24 +48,20 @@ const signinBody = z.object({
 router.post("/signin", async (req, res) => {
     const parsed = signinBody.safeParse(req.body);
     if (!parsed.success) {
-        return res.status(411).json({
-            message: "Incorrect inputs"
-        });
+        return res.status(411).json({ message: "Incorrect inputs" });
     }
 
-    const user = await User.findOne({
-        email: req.body.email,
-        password: req.body.password
-    });
-
+    const user = await User.findOne({ email: req.body.email, password: req.body.password });
     if (user) {
         const token = jwt.sign({ userId: user._id }, JWT_SECRET);
         return res.json({ token });
     }
 
-    res.status(411).json({
-        message: "Error while Logging in"
-    });
+    res.status(411).json({ message: "Error while Logging in" });
+});
+
+router.post("/logout", authMiddleware, (req, res) => {
+    res.status(200).json({ message: "Logged out successfully. Please remove the token from client storage." });
 });
 
 const updateBody = z.object({
@@ -85,9 +74,7 @@ router.put("/user", authMiddleware, async (req, res) => {
     const parsed = updateBody.safeParse(req.body);
 
     if (!parsed.success) {
-        return res.status(411).json({
-            message: "Error while updating information"
-        });
+        return res.status(411).json({ message: "Error while updating information" });
     }
 
     const updatedDoc = await User.findOneAndUpdate({ _id: req.userId }, req.body);
@@ -114,6 +101,12 @@ router.get("/bulk", authMiddleware, async (req, res) => {
             _id: user._id
         }))
     });
+});
+
+router.get("/me", authMiddleware, async (req, res) => {
+    const user = await User.findById(req.userId).select("firstName lastName email");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
 });
 
 module.exports = router;
