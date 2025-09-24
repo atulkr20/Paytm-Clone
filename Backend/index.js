@@ -9,7 +9,24 @@ const accountRouter = require("./routes/account");
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+const allowedOrigins = (process.env.CORS_ORIGIN || "*")
+  .split(",")
+  .map(o => o.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // non-browser or same-origin
+    if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true
+}));
+
+// Handle preflight for all routes
+app.options('*', cors());
 app.use(express.json());
 
 app.use("/api/v1", rootRouter);
@@ -26,5 +43,5 @@ app.get("/health", (_req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(` Server running on port ${PORT}`);
 });
