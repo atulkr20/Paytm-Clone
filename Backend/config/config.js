@@ -1,3 +1,3 @@
 module.exports = {
-    JWT_SECRET: "atul-jwt-secret"
+    JWT_SECRET: process.env.JWT_SECRET || "dev-secret"
 }

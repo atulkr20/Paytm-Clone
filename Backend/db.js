@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
 
+const mongoUri = process.env.MONGODB_URI || "";
+
 main().catch(err => console.log("Error Connecting to MongoDB"));
 
 async function main() {
-    await mongoose.connect("mongodb+srv://atulkrjha59_db_user:CjsYpWHEtb5yp6W7@cluster0.yzo4umv.mongodb.net/");
+    if (!mongoUri) {
+        throw new Error("Missing MONGODB_URI env var");
+    }
+    await mongoose.connect(mongoUri);
     console.log("Connected to MongoDB");
 
     // Drop old username index if it exists
