@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
@@ -8,6 +9,7 @@ export const Dashboard = () => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -16,7 +18,7 @@ export const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      navigate("/signin", { replace: true });
     } catch (err) {
       console.error("Logout failed", err);
     }
@@ -38,7 +40,7 @@ export const Dashboard = () => {
         setUser(userRes.data);
       } catch (err) {
         console.error(err);
-        window.location.href = "/login"; // redirect if token invalid
+        navigate("/signin", { replace: true }); // redirect if token invalid
       } finally {
         setLoading(false);
       }
