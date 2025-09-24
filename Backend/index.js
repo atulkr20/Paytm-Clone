@@ -22,11 +22,12 @@ app.use(cors({
     }
     return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true
+  credentials: true,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  optionsSuccessStatus: 204
 }));
 
-// Handle preflight for all routes
-app.options('*', cors());
 app.use(express.json());
 
 app.use("/api/v1", rootRouter);
