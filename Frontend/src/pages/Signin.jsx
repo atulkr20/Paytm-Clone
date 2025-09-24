@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api"; // centralized API instance
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
@@ -14,18 +14,7 @@ export const Signin = () => {
 
   const handleSignin = async () => {
     try {
-      const res = await axios.post(
-        "/api/v1/user/signin",
-        {
-          email,     
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await api.post("/user/signin", { email, password });
       localStorage.setItem("token", res.data.token); // save token
       navigate("/dashboard"); // redirect to dashboard
     } catch (err) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import { Button } from "./Button";
 
 export const Users = () => {
@@ -9,23 +9,14 @@ export const Users = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.get(`/api/v1/user/bulk?filter=${filter}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
-        const list = (res?.data?.users && Array.isArray(res.data.users))
-          ? res.data.users
-          : (res?.data?.user && Array.isArray(res.data.user))
-            ? res.data.user
-            : [];
-
+        const res = await api.get(`/user/bulk?filter=${filter}`);
+        const list = Array.isArray(res.data.users) ? res.data.users : [];
         setUsers(list);
       } catch (err) {
         console.error(err);
@@ -37,7 +28,7 @@ export const Users = () => {
     };
 
     fetchUsers();
-  }, [filter, token]);
+  }, [filter]);
 
   return (
     <div className="mt-6">
@@ -58,12 +49,9 @@ export const Users = () => {
       {!loading && !error && users.length === 0 && <div className="mt-3 text-sm text-zinc-600">No users found.</div>}
 
       <div className="mt-4 space-y-2">
-        {users.map(
-          (user) =>
-            user && (
-              <User key={user._id} user={user} navigate={navigate} />
-            )
-        )}
+        {users.map((user) => (
+          <User key={user._id} user={user} navigate={navigate} />
+        ))}
       </div>
     </div>
   );

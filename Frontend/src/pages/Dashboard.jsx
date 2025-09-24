@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
-import axios from "axios";
+import api from "../utils/api";
 
 export const Dashboard = () => {
   const [balance, setBalance] = useState(null);
@@ -13,10 +13,7 @@ export const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("/api/v1/user/logout", {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post("/user/logout");
       localStorage.removeItem("token");
       navigate("/signin", { replace: true });
     } catch (err) {
@@ -27,16 +24,10 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        const balanceRes = await axios.get("/api/v1/account/balance", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const balanceRes = await api.get("/account/balance");
         setBalance(balanceRes.data.balance);
 
-        const userRes = await axios.get("/api/v1/user/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const userRes = await api.get("/user/me");
         setUser(userRes.data);
       } catch (err) {
         console.error(err);

@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useState } from "react";
+import api from "../utils/api"; // make sure this points to your api.js
 
 export const SendMoney = () => {
   const [searchParams] = useSearchParams();
@@ -14,12 +14,7 @@ export const SendMoney = () => {
   const handleTransfer = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "/api/v1/account/transfer",
-        { to: id, amount: Number(amount) },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post("/account/transfer", { to: id, amount: Number(amount) });
       setSuccess(true);
     } catch (err) {
       console.error(err);
@@ -37,7 +32,7 @@ export const SendMoney = () => {
             <h2 className="text-xl font-semibold tracking-tight">Send money</h2>
             <div className="mt-4 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                <span className="text-sm font-medium">{name ? name[0].toUpperCase() : '?'}</span>
+                <span className="text-sm font-medium">{name ? name[0].toUpperCase() : "?"}</span>
               </div>
               <div className="text-sm text-zinc-700">{name}</div>
             </div>
@@ -56,7 +51,7 @@ export const SendMoney = () => {
                 <button
                   onClick={handleTransfer}
                   disabled={loading}
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-black text-white hover:bg-zinc-900 disabled:opacity-50"
                 >
                   {loading ? "Processing..." : "Send"}
                 </button>
@@ -71,8 +66,18 @@ export const SendMoney = () => {
             <h3 className="mt-4 text-lg font-semibold">Transfer successful</h3>
             <p className="mt-1 text-sm text-zinc-600">Your money is on its way to {name}.</p>
             <div className="mt-6 flex gap-2">
-              <button onClick={() => navigate('/dashboard')} className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-black text-white hover:bg-zinc-900">Back to dashboard</button>
-              <button onClick={() => { setSuccess(false); setAmount(0); }} className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-zinc-200 hover:bg-zinc-50">Send again</button>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 bg-black text-white hover:bg-zinc-900"
+              >
+                Back to dashboard
+              </button>
+              <button
+                onClick={() => { setSuccess(false); setAmount(0); }}
+                className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 border border-zinc-200 hover:bg-zinc-50"
+              >
+                Send again
+              </button>
             </div>
           </div>
         )}
