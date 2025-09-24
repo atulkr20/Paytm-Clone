@@ -9,22 +9,31 @@ const accountRouter = require("./routes/account");
 
 const app = express();
 
-// Allowed origins from environment variable
-const allowedOrigins = (process.env.CORS_ORIGIN || "")
+// Allowed origins
+// Use CORS_ORIGIN or CORS_ORIGINS (comma-separated). Default to localhost dev ports.
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ||
+  process.env.CORS_ORIGIN ||
+  "http://localhost:5173,http://127.0.0.1:5173"
+)
   .split(",")
   .map(o => o.trim())
   .filter(Boolean);
 
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser or same-origin requests
+    if (!origin) return callback(null, true);
     if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    // Support Vite preview which often uses http://localhost:4173
+    if (origin && /localhost:(5173|4173)$/.test(origin)) {
       return callback(null, true);
     }
     console.log("Blocked by CORS:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true, // allow cookies/auth headers
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204

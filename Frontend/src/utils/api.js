@@ -1,20 +1,27 @@
-
 import axios from "axios";
 
+// Prefer Vite env at build-time; fallback to common localhost default
+const baseURL = (
+    import.meta.env.VITE_API_BASE_URL ||
+    process.env.VITE_API_BASE_URL ||
+    "http://localhost:3000/api/v1"
+);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE, // picks from .env
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL,
+    withCredentials: false
 });
 
-// Add token to every request if exists
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+// Attach bearer token from localStorage
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
 });
 
 export default api;
+
+

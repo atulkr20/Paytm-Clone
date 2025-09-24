@@ -1,28 +1,16 @@
 const mongoose = require("mongoose");
 
-const mongoUri = process.env.MONGO_URI || "";
+// Support both MONGODB_URI and MONGO_URI; prefer MONGODB_URI
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || "";
 
 main().catch(err => console.log("Error Connecting to MongoDB"));
 
 async function main() {
     if (!mongoUri) {
-        throw new Error("Missing MONGODB_URI env var");
+        throw new Error("Missing Mongo connection string (MONGODB_URI or MONGO_URI)");
     }
     await mongoose.connect(mongoUri);
     console.log("Connected to MongoDB");
-
-    // Drop old username index if it exists
-    await User.collection.dropIndex("username_1").catch(err => {
-        if (err.code === 27) { // index not found
-            console.log("Old username index not found, skipping…");
-        } else {
-            throw err;
-        }
-    });
-
-    // Sync indexes for email unique constraint
-    await User.syncIndexes();
-    console.log("Indexes synced successfully!");
 }
 
 // User schema
