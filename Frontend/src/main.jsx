@@ -5,8 +5,6 @@ import axios from "axios";
 import App from "./App.jsx";
 import "./index.css";
 
-// Configure axios base URL
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE || 'https://paytm-project-1m7n.onrender.com';
 
 const root = createRoot(document.getElementById("root"));
 root.render(
